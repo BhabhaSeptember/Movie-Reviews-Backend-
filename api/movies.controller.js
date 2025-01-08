@@ -1,12 +1,11 @@
 import MoviesDAO from "../dao/moviesDAO.js";
 
 export default class MoviesController {
-
+  
   static async apiGetMovies(req, res, next) {
-
-//if moviesPerPage query string exists in response object we parseInt that value... 
-//...or else retrieve 20 results
-    const moviesPerPage = req.query.moviesPerPage 
+    //if moviesPerPage query string exists in response object we parseInt that value...
+    //...or else retrieve 20 results
+    const moviesPerPage = req.query.moviesPerPage
       ? parseInt(req.query.moviesPerPage)
       : 20;
 
@@ -14,20 +13,19 @@ export default class MoviesController {
 
     let filters = {};
 
-//check if rated query string exists then add to filters object    
+    //check if rated query string exists then add to filters object
     if (req.query.rated) {
       filters.rated = req.query.rated;
     } else if (req.query.title) {
       filters.title = req.query.title;
     }
 
-
     const { moviesList, totalNumMovies } = await MoviesDAO.getMovies({
       filters,
       page,
       moviesPerPage,
     });
-    
+
     let response = {
       movies: moviesList,
       page: page,
@@ -36,5 +34,32 @@ export default class MoviesController {
       total_results: totalNumMovies,
     };
     res.json(response);
+  }
+
+  static async apiGetMovieById(req, res, next) {
+    try {
+      let id = req.params.id || {};
+
+      let movie = await MoviesDAO.getMovieById(id);
+
+      if (!movie) {
+        res.status(404).json({ error: "not found" });
+        return;
+      }
+      res.json(movie);
+    } catch (e) {
+      console.log(`api, ${e}`);
+      res.status(500).json({ error: e });
+    }
+  }
+
+  static async apiGetRatings(req, res, next) {
+    try {
+      let propertyTypes = await MoviesDAO.getRatings();
+      res.json(propertyTypes);
+    } catch (e) {
+      console.log(`api,${e}`);
+      res.status(500).json({ error: e });
+    }
   }
 }

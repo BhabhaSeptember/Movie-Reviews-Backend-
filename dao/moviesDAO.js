@@ -1,8 +1,11 @@
+import mongodb from "mongodb";
+
+const ObjectId = mongodb.ObjectID;
+
 let movies; //store reference to database
 
 export default class MoviesDAO {
-  
-    //METHODS
+  //METHODS
 
   //called as soon as server starts, provides db reference to movies
   static async injectDB(conn) {
@@ -20,7 +23,8 @@ export default class MoviesDAO {
     }
   }
 
-  static async getMovies({ //default filter object
+  static async getMovies({
+    //default filter object
     filters = null,
     page = 0,
     moviesPerPage = 20, //will only get 20 movies at once
@@ -48,6 +52,42 @@ export default class MoviesDAO {
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`);
       return { moviesList: [], totalNumMovies: 0 };
+    }
+  }
+
+  static async getRatings() {
+    let ratings = [];
+    try {
+      ratings = await movies.distinct("rated");
+      return ratings;
+    } catch (e) {
+      console.error(`unable to get ratings, $(e)`);
+      return ratings;
+    }
+  }
+
+  static async getMovieById(id) {
+    try {
+      return await movies
+        .aggregate([
+          {
+            $match: {
+              _id: new ObjectId(id),
+            },
+          },
+          {
+            $lookup: {
+              from: "reviews",
+              localField: "_id",
+              foreignField: "movie_id",
+              as: "reviews",
+            },
+          },
+        ])
+        .next();
+    } catch (e) {
+      console.error(`something went wrong in getMovieById: ${e}`);
+      throw e;
     }
   }
 }
