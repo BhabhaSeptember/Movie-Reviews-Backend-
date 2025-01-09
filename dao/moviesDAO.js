@@ -29,8 +29,11 @@ export default class MoviesDAO {
     page = 0,
     moviesPerPage = 20, //will only get 20 movies at once
   } = {}) {
+
+
     //construct query
     let query;
+
     if (filters) {
       if ("title" in filters) {
         query = { $text: { $search: filters["title"] } };
@@ -48,6 +51,7 @@ export default class MoviesDAO {
 
       const moviesList = await cursor.toArray();
       const totalNumMovies = await movies.countDocuments(query);
+      
       return { moviesList, totalNumMovies };
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`);
