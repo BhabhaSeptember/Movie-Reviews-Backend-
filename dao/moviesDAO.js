@@ -1,17 +1,6 @@
 import mongodb from "mongodb";
 
-// import mongoose, { ObjectId } from "mongoose";
-
-// import mongoose from "mongoose";
-// const ObjectId = new mongoose.Types.ObjectId();
-
-
-// const ObjectId = mongoose.Types;
-
-// const { ObjectId } = require('mongoose').Types;
-
 const ObjectId = mongodb.ObjectId;
-//=================================================================
 
 let movies; //store reference to database
 
